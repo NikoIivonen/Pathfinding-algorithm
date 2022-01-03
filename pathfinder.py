@@ -29,11 +29,17 @@ class Visited:
         self.x = x
         self.y = y
         self.blue = blue
-        self.width= gap/3
+        self.width = 1
 
     def draw(self):
-        self.width -= 0.1
-        pygame.draw.circle(screen, (0, 0, self.blue), (self.x+gap/2, self.y+gap/2), self.width)
+        self.width += 0.2
+        self.blue += 5
+        self.blue = min(255, self.blue)
+
+        if self.width < gap/2:
+            pygame.draw.circle(screen, (0, self.blue, self.blue), (self.x+gap/2, self.y+gap/2), self.width)
+        else:
+            pygame.draw.rect(screen, (0, self.blue, self.blue), (self.x, self.y, round(gap), round(gap)))
 
 
 def dist(x1, y1, x2, y2):
@@ -224,6 +230,7 @@ start_y = 0
 
 button_reset = pygame.Rect(850, 150, 100, 50)
 button_set_start = pygame.Rect(850, 250, 100, 50)
+button_clear_walls = pygame.Rect(850, 350, 100, 50)
 
 
 def reset():
@@ -242,9 +249,6 @@ def reset():
     visual_path_coords.clear()
     visited_objects.clear()
     visited.clear()
-
-    obs_list.clear()
-    obs_coords.clear()
 
 
 while True:
@@ -286,6 +290,10 @@ while True:
                 if button_set_start.collidepoint(x, y):
                     start = True
 
+                if button_clear_walls.collidepoint(x, y):
+                    obs_list.clear()
+                    obs_coords.clear()
+
             elif e.button == 3 and not goal_reached:
                 # mx, my = pygame.mouse.get_pos()
                 # mx = floor(mx / gap) * gap
@@ -326,18 +334,6 @@ while True:
     for obs in obs_list:
         obs.draw()
 
-    """DRAW LINES"""
-
-    xx = gap
-    yy = gap
-
-    for i in range(width_squares - 1):
-        pygame.draw.line(screen, (0, 0, 0), (xx, 0), (xx, 800))
-        pygame.draw.line(screen, (0, 0, 0), (0, yy), (800, yy))
-
-        xx += gap
-        yy += gap
-
     """VISITED SQUARES"""
 
     if not goal_reached:
@@ -372,7 +368,19 @@ while True:
         for coord in visual_path_coords:
             pygame.draw.rect(screen, (0, 180, 0), (coord[0], coord[1], round(gap), round(gap)))
 
-    """DRAWIG BUTTONS"""
+    """DRAW LINES"""
+
+    xx = gap
+    yy = gap
+
+    for i in range(width_squares - 1):
+        pygame.draw.line(screen, (0, 0, 0), (xx, 0), (xx, 800))
+        pygame.draw.line(screen, (0, 0, 0), (0, yy), (800, yy))
+
+        xx += gap
+        yy += gap
+
+    """DRAWING BUTTONS"""
 
     pygame.draw.rect(screen, (0, 200, 0), button_reset)
     text = font.render("Reset", True, (0, 0, 0))
@@ -382,10 +390,11 @@ while True:
     text = font.render("Find", True, (0, 0, 0))
     screen.blit(text, (button_set_start.x + 20, button_set_start.y + 8))
 
+    pygame.draw.rect(screen, (0, 200, 0), button_clear_walls)
+    text = font.render("Clear", True, (0, 0, 0))
+    screen.blit(text, (button_clear_walls.x + 20, button_clear_walls.y + 8))
+
     if start:
         clock.tick(round(width_squares/2))
-
-    current_blue += 2
-    current_blue = min(255, current_blue)
 
     pygame.display.flip()
